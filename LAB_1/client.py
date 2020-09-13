@@ -1,26 +1,31 @@
 import socket
 import argparse
 
-# TODO: Uncomment this once HTTP request + opening files on server is done
+# Client Definitions
+Port = 1337         # low number ports are usually reserved, use a nice high number (4 digits) https://docs.python.org/3.5/howto/sockets.html
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('host', type=str)
-# parser.add_argument('port', type=int)
-# parser.add_argument('filename', type=str)
-# parser.add_argument('timeout', type=int, nargs='?', default=5)
+if __name__ == "__main__":
 
-# args = parser.parse_args()
+    # TODO: Uncomment this once HTTP request + opening files on server is done
 
-# print(args.host)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('host', type=str)
+    parser.add_argument('port', type=int)
+    parser.add_argument('filename', type=str)
+    parser.add_argument('timeout', type=int, nargs='?', default=5)
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    args = parser.parse_args()
 
-# client usually remote to server, but in this case its on the same machine
-client_socket.connect((socket.gethostname(), 1337))
+    print(args.host)
+
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # client usually remote to server, but in this case its on the same machine
+    client_socket.connect((socket.gethostname(), Port))
 
 
-client_socket.send(bytes("Successfully Connected!", "utf-8"))
+    client_socket.send(bytes("Successfully Connected!", "utf-8"))
 
-# TODO
-# 1. Set up client_socket with argument values
-# 2. Print file content when  HTTP response received, otherwise terminate after <-timeout>
+    # TODO
+    # 1. Set up client_socket with argument values
+    # 2. Print file content when  HTTP response received, otherwise terminate after <-timeout>
