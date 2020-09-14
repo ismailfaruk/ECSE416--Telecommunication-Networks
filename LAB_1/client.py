@@ -2,49 +2,59 @@ import socket
 import argparse
 import sockethelp
 
-#----------------------------------------Client Definitions----------------------------------------
-Host = socket.gethostname()     # Sets the current computer name as hostname
-Port = 1337                     # low number ports are usually reserved, use a nice high number (4 digits) https://docs.python.org/3.5/howto/sockets.html
-BufferSize = 1024               # MAX of 1024 bytes for the buffer
-EncodeFormat = "utf-8"          # Message encoder format
-Timeout = 5                     # Set timeout to 1 second so accept() will become (somewhat nonblocking)
+#----------------------------------------Client Constant Definitions----------------------------------------
+DEFAULT_TIMEOUT = 5             # Default timeout for client to wait for a response
+ENCODE_FORMAT = "utf-8"         # Message encoder format
 #--------------------------------------------------------------------------------------------------
 
 def interface():
-    # TODO: Uncomment this once HTTP request + opening files on server is done
 
     parser = argparse.ArgumentParser()
     parser.add_argument('host', type=str)
     parser.add_argument('port', type=int)
     parser.add_argument('filename', type=str)
-    parser.add_argument('timeout', type=int, nargs='?', default=5)
+    parser.add_argument('timeout', type=int, nargs='?', default=DEFAULT_TIMEOUT)
     args = parser.parse_args()
-    print(args.host)
     return args
 
-def client(Host, Port, Filename, Timeout):
+def client(host, port, filename, timeout):
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((Host, Port))
+        client_socket.settimeout(timeout)
+        client_socket.connect((host, port))
         print("Connection: OK")        
 
-        sockethelp.write(client_socket, Filename)
+        request_message = f"GET /{filename} HTTP/1.1"
+        sockethelp.write_http_header(client_socket, request_message)
         print("Request message sent.")
 
-        ServerMessage = sockethelp.read(client_socket)
-        print("Server HTTP Response: ", ServerMessage)
+        # Print HTTP Header
+        server_message = sockethelp.read_http_header(client_socket)
+
+        print("Server HTTP Response: ", server_message)
+
+        response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]]) # Create dictionary that holds header information
+        # Example : {'Content-Type': 'text/plain', 'Content-Length': '1024'}
         
+        # Handle HTTP Body if response headers exist (Should maybe instead check for 404)
+        if response_headers:
+            file_content = sockethelp.read_http_body(client_socket, int(response_headers['Content-Length']))  
+            # Handle what to do with file_content based on content type.
+            content_type = response_headers['Content-Type']
+            if content_type == "text/plain":
+                file_content = file_content.decode(ENCODE_FORMAT)
+                print(file_content)
+            elif content_type == "image/jpeg":
+                pass
+
+
         client_socket.close()
         print("Socket Closed.")
 
-    except Exception as ErrorMessage:
-        print("- ERROR: ", ErrorMessage)
+    except Exception as error_message:
+        print("- ERROR: ", error_message)
 
-    # TODO
-    # 1. Set up client_socket with argument values
-    # 2. Print file content when  HTTP response received, otherwise terminate after <-timeout>
 
 if __name__ == "__main__":
-    # Input = interface()
-    # client(Input.host, Input.port, Input.filename, Input.timeout)
-    client(Host, Port, "pic.jpg", Timeout)
+    client_params = interface()
+    client(client_params.host, client_params.port, client_params.filename, client_params.timeout)

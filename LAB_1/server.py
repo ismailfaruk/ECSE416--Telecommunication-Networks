@@ -1,13 +1,13 @@
 import socket
 import os
 import sockethelp
-#----------------------------------------Server Definitions----------------------------------------
-# Server Definitions
-Host = socket.gethostname()     # Sets the current computer name as hostname
-Port = 1337                     # low number ports are usually reserved, use a nice high number (4 digits) https://docs.python.org/3.5/howto/sockets.html
-Timeout = 1                     # Set timeout to 1 second so accept() will become (somewhat nonblocking)
-MaxRequest = 1                  # Prepared to listen to a single socket at most
-BufferSize = 1024               # MAX of 1024 bytes for the buffer
+import mimetypes
+
+#----------------------------------------Server Constant Definitions----------------------------------------
+HOST = "localhost"               # Sets the current computer name as hostname
+PORT = 1337                      # low number ports are usually reserved, use a nice high number (4 digits) https://docs.python.org/3.5/howto/sockets.html
+TIMEOUT = 1                      # Set timeout to 1 second so accept() will become (somewhat nonblocking)
+MAX_REQUEST = 1                  # Prepared to listen to a single socket at most
 #--------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
@@ -15,38 +15,49 @@ if __name__ == "__main__":
     # SOCK_STREAM corresponds to TCP 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # socket.gethosename makes socket visible to outside world.
-    server_socket.bind((Host, Port))
-    server_socket.settimeout(Timeout) 
+    server_socket.bind((HOST, PORT))
+    server_socket.settimeout(TIMEOUT) 
     # Socket is simply an endpoint that send/receives data.
     # It sits in a corresponding port-IP pair
-    server_socket.listen(MaxRequest)
-    print("Server started: ", Host, ":", Port)
+    server_socket.listen(MAX_REQUEST)
+    print("Server started: ", HOST, ":", PORT)
 
     try:
         while True:
             # create connection socket, address -> IP address of where data coming from
             try:
                 client_socket, address = server_socket.accept() # Note that accept here is blocking 
-                # Remember sockets receive stream of data ( how much chunks of data we receive at a time)
-                ClientMessage = sockethelp.read(client_socket)
-                print(ClientMessage)
+                client_message = sockethelp.read_http_header(client_socket) # Receive client HTTP request
+                # Parses filename from GET request ie: GET /{filename} HTTP/1.1
+                filename = client_message.split()[1][1:] 
 
-                if os.path.isfile(ClientMessage):
-                    ServerMessage = "HTTP/1.1 200 OK"                    
+                if os.path.isfile(filename):
+                    server_message = "HTTP/1.1 200 OK\n"
+                    
+                    # Read file content from requested filename
+                    file_obj = open(filename, "rb")
+                    file_content = file_obj.read()
+                    file_obj.close()
+
+                    # Gets the appropriate Content-Type based on file extension
+                    content_type = mimetypes.guess_type(filename, strict=True)[0] # This returns a tuple (type, encoding)
+                    content_length = str(len(file_content))
+                    # Concatenate Content-Type header to HTTP response
+                    server_message = server_message + "Content-Type: " + content_type + "\n"
+                    # Concatenate Content-Length header to HTTP response
+                    server_message = server_message + "Content-Length: " + content_length + "\n"
+                    
+                    # Send header followed by body
+                    sockethelp.write_http_header(client_socket, server_message)
+                    sockethelp.write_http_body(client_socket, file_content)
+
+
                 else:
-                    ServerMessage = "\HTTP/1.1 404 not found"
-                
-                sockethelp.write(client_socket, ServerMessage)
-            
+                    server_message = "HTTP/1.1 404 Not Found"
+                    sockethelp.write_http_header(client_socket, server_message)
+
             except socket.timeout:
                 pass
-
-            # TODO
-            # 1. Receive an HTTP request
-            # 2. Parse it to retrieve filename
-            # 3. Get file from directory
-            # 4. Send HTTP response to client with file content (404 if file not found)
 
     except KeyboardInterrupt:
         server_socket.close()
