@@ -1,50 +1,41 @@
 import socket
 
 #----------------------------------------Socket Definitions----------------------------------------
-# Server Definitions
-Host = socket.gethostname()     # Sets the current computer name as hostname
-Port = 1337                     # low number ports are usually reserved, use a nice high number (4 digits) https://docs.python.org/3.5/howto/sockets.html
-BufferSize = 1024               # MAX of 1024 bytes for the buffer
-EncodeFormat = "utf-8"          # Message encoder format
-Timeout = 5                     # Set timeout to 1 second so accept() will become (somewhat nonblocking)
+BUFFER_SIZE = 1024              # MAX of 1024 bytes for the buffer of http header
+ENCODE_FORMAT = "utf-8"         # Message encoder format
 
-# _Host = socket.gethostname()     # Sets the current computer name as hostname
-# _Port = 1337                     # low number ports are usually reserved, use a nice high number (4 digits) https://docs.python.org/3.5/howto/sockets.html
-# _Timeout = 1                     # Set timeout to 1 second so accept() will become (somewhat nonblocking)
-# _MaxRequest = 1                  # Prepared to listen to a single socket at most
-# _BufferSize = 1024               # MAX of 1024 bytes for the buffer
-# _EncoderFormat = "utf-8"         # Message encoder format
-#--------------------------------------------------------------------------------------------------
 
-# class Socket:
-#     def __init__(self, Host = _Host, Port = _Port, Timeout = _Timeout, EncoderFormat = _EncoderFormat):
-#         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#         self.Host = Host
-#         self.Port = Port
-#         self.Timeout = Timeout
-#         self.EncoderFormat = EncoderFormat
+def write_http_header(socket, message):
+    encoded_message = bytes(message, ENCODE_FORMAT)
+    socket.send(encoded_message)
 
-#     def connect(self):
-#         self.socket.connect((self.Host, self.Port))
-#         return socket
+def write_http_body(socket, message):
+    # Mostly taken from https://docs.python.org/3.8/howto/sockets.html#using-a-socket
+    totalsent = 0
+    while totalsent < len(message):
+        sent = socket.send(message[totalsent:])
+        if sent == 0:
+            raise RuntimeError("socket connection broken")
+        totalsent = totalsent + sent
 
-#     def Read(self, Socket):
-#         RecievedMessage = self.socket.recv(_BufferSize).decode(_EncoderFormat)
-#         return RecievedMessage
-        
-#     def Write(self, Socket, Message):
-#         EncodedMessage = bytes(Message, self.EncoderFormat)
-#         self.socket.send(EncodedMessage)
+def read_http_header(socket):
+    received_message = socket.recv(BUFFER_SIZE).decode(ENCODE_FORMAT)
+    return received_message
 
-def write(Socket, Message):
-    EncodeFormat = "utf-8"
-    EncodedMessage = bytes(Message, EncodeFormat)
-    Socket.send(EncodedMessage)
+def read_http_body(socket, content_length):
+    # Mostly taken from https://docs.python.org/3.8/howto/sockets.html#using-a-socket
+    chunks = []
+    bytes_recd = 0
+    while bytes_recd < content_length:
+        chunk = socket.recv(min(content_length - bytes_recd, BUFFER_SIZE))
+        if chunk == b'':
+            raise RuntimeError("socket connection broken") 
+        chunks.append(chunk)
+        bytes_recd = bytes_recd + len(chunk)
+    file_content = b''.join(chunks)
 
-def read(Socket):
-    # TODO: implement a good reader
-    RecievedMessage = Socket.recv(BufferSize).decode(EncodeFormat)
-    return RecievedMessage
+    return file_content
+
 
 if __name__ == "__main__":
     # unit tests for tcpSocket file
