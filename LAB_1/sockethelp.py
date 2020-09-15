@@ -39,8 +39,6 @@ def read_http_body(socket, content_length):
 
 if __name__ == "__main__":
     # unit tests for tcpSocket file
-    
-    # Newsocket = Socket()
-    # Newsocket.connect()
+
     pass
     

@@ -30,17 +30,20 @@ if __name__ == "__main__":
                 client_message = sockethelp.read_http_header(client_socket) # Receive client HTTP request
                 # Parses filename from GET request ie: GET /{filename} HTTP/1.1
                 filename = client_message.split()[1][1:] 
-
-                if os.path.isfile(filename):
+                
+                # assumption: files are all in same directory as server
+                filewithDir = os.path.join(os.path.dirname(__file__), filename)
+                
+                if os.path.isfile(filewithDir):
                     server_message = "HTTP/1.1 200 OK\n"
                     
                     # Read file content from requested filename
-                    file_obj = open(filename, "rb")
+                    file_obj = open(filewithDir, "rb")
                     file_content = file_obj.read()
                     file_obj.close()
 
                     # Gets the appropriate Content-Type based on file extension
-                    content_type = mimetypes.guess_type(filename, strict=True)[0] # This returns a tuple (type, encoding)
+                    content_type = mimetypes.guess_type(filewithDir, strict=True)[0] # This returns a tuple (type, encoding)
                     content_length = str(len(file_content))
                     # Concatenate Content-Type header to HTTP response
                     server_message = server_message + "Content-Type: " + content_type + "\n"

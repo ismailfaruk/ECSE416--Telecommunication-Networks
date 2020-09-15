@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["localhost", "12345", "x.txt"]
+            "args": ["localhost", "1337", "pic.jpg"]
         }
     ]
 }
