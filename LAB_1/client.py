@@ -1,6 +1,9 @@
 import socket
 import argparse
 import sockethelp
+import os
+import time
+from PIL import Image
 
 #----------------------------------------Client Constant Definitions----------------------------------------
 DEFAULT_TIMEOUT = 5             # Default timeout for client to wait for a response
@@ -22,7 +25,7 @@ def client(host, port, filename, timeout):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.settimeout(timeout)
         client_socket.connect((host, port))
-        print("Connection: OK")        
+        print("Connection: OK")
 
         request_message = f"GET /{filename} HTTP/1.1"
         sockethelp.write_http_header(client_socket, request_message)
@@ -33,28 +36,45 @@ def client(host, port, filename, timeout):
 
         print("Server HTTP Response: ", server_message)
 
-        response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]]) # Create dictionary that holds header information
+        # Create dictionary that holds header information
         # Example : {'Content-Type': 'text/plain', 'Content-Length': '1024'}
+        response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]]) 
         
         # Handle HTTP Body if response headers exist (Should maybe instead check for 404)
         if response_headers:
-            file_content = sockethelp.read_http_body(client_socket, int(response_headers['Content-Length']))  
+
+            # the response is decoded to get the file content
+            file_content = sockethelp.read_http_body(client_socket, int(response_headers['Content-Length']))
+            
             # Handle what to do with file_content based on content type.
             content_type = response_headers['Content-Type']
             if content_type == "text/plain":
                 file_content = file_content.decode(ENCODE_FORMAT)
                 print(file_content)
             elif content_type == "image/jpeg":
-                pass
-
-
+                epoch = time.time()
+                tempImage = f"tempImage{epoch}.jpg"          # epic time is added to temp file to avoid duplicate names
+                with open(tempImage, "wb") as temp:
+                    temp.write(file_content)
+                im = Image.open(tempImage)
+                im.show()
+                
+                # removes tempImage file
+                os.remove(tempImage)
+                
         client_socket.close()
-        print("Socket Closed.")
+        print("\nSocket Closed.")
 
     except Exception as error_message:
         print("- ERROR: ", error_message)
-
+        with open("TEST_LOG.txt", a) as log
+            log.write(f"- ERROR: {error_message}\n")
 
 if __name__ == "__main__":
+    iteration = 100
     client_params = interface()
-    client(client_params.host, client_params.port, client_params.filename, client_params.timeout)
+
+    # running interation of client to check for errors
+    for x in range(iteration):
+        client(client_params.host, client_params.port, client_params.filename, client_params.timeout)
+    pass
