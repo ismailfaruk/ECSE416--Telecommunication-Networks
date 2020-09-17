@@ -67,7 +67,7 @@ def client(host, port, filename, timeout):
 
     except Exception as error_message:
         print("- ERROR: ", error_message)
-        with open("TEST_LOG.txt", a) as log:
+        with open("TEST_LOG.txt", "a") as log:
             log.write(f"- ERROR: {error_message}\n")
 
 if __name__ == "__main__":
