@@ -3,7 +3,7 @@ import socket
 #----------------------------------------Socket Definitions----------------------------------------
 BUFFER_SIZE = 1024              # MAX of 1024 bytes for the buffer of http header
 ENCODE_FORMAT = "utf-8"         # Message encoder format
-
+BYTE_PREFIX = b''               # to rename this var
 
 def write_http_header(socket, message):
     encoded_message = bytes(message, ENCODE_FORMAT)
@@ -28,11 +28,11 @@ def read_http_body(socket, content_length):
     bytes_recd = 0
     while bytes_recd < content_length:
         chunk = socket.recv(min(content_length - bytes_recd, BUFFER_SIZE))
-        if chunk == b'':
+        if chunk == BYTE_PREFIX:
             raise RuntimeError("socket connection broken") 
         chunks.append(chunk)
         bytes_recd = bytes_recd + len(chunk)
-    file_content = b''.join(chunks)
+    file_content = BYTE_PREFIX.join(chunks)
 
     return file_content
 
