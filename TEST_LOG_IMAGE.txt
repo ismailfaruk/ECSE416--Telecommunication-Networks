@@ -1,0 +1,7 @@
+- Iteration: 17 - ERROR: 'utf-8' codec can't decode byte 0x89 in position 64: invalid start byte
+- Iteration: 26 - ERROR: 'utf-8' codec can't decode byte 0x89 in position 64: invalid start byte
+- Iteration: 39 - ERROR: 'utf-8' codec can't decode byte 0x89 in position 64: invalid start byte
+- Iteration: 47 - ERROR: 'utf-8' codec can't decode byte 0x89 in position 64: invalid start byte
+- Iteration: 60 - ERROR: 'utf-8' codec can't decode byte 0x89 in position 64: invalid start byte
+- Iteration: 64 - ERROR: 'utf-8' codec can't decode byte 0x89 in position 64: invalid start byte
+- Iteration: 94 - ERROR: 'utf-8' codec can't decode byte 0x89 in position 64: invalid start byte
