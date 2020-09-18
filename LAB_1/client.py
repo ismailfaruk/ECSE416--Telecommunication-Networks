@@ -20,7 +20,7 @@ def interface():
     args = parser.parse_args()
     return args
 
-def client(host, port, filename, timeout):
+def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.settimeout(timeout)
@@ -73,8 +73,4 @@ def client(host, port, filename, timeout):
 if __name__ == "__main__":
     iteration = 100
     client_params = interface()
-
-    # running interation of client to check for errors
-    for x in range(iteration):
-        client(client_params.host, client_params.port, client_params.filename, client_params.timeout)
-    pass
+    client(client_params.host, client_params.port, client_params.filename, client_params.timeout)
