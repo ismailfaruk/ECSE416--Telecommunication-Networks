@@ -71,6 +71,5 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
             log.write(f"- ERROR: {error_message}\n")
 
 if __name__ == "__main__":
-    iteration = 100
     client_params = interface()
     client(client_params.host, client_params.port, client_params.filename, client_params.timeout)
