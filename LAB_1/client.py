@@ -47,7 +47,7 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
     if response_headers and ErrorMessage not in server_message:
         
         # send ACK message
-        ack_message = "0"
+        ack_message = "1"
         sockethelp.write_http_header(client_socket, ack_message)
 
         # the response is decoded to get the file content
@@ -73,7 +73,7 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
     
     else:
         # send ACK message to not recieve anything and close socket
-        ack_message = "1"
+        ack_message = "0"
         sockethelp.write_http_header(client_socket, ack_message)
 
     client_socket.close()
