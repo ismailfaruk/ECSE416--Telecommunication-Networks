@@ -6,9 +6,9 @@ import time
 from PIL import Image
 
 #----------------------------------------Client Constant Definitions----------------------------------------
-DEFAULT_TIMEOUT = 5                         # Default timeout for client to wait for a response
-ENCODE_FORMAT = "utf-8"                     # Message encoder format
-ErrorMessage = "HTTP/1.1 404 Not Found"     # check for error message
+DEFAULT_TIMEOUT = 5                             # Default timeout for client to wait for a response
+ENCODE_FORMAT = "utf-8"                         # Message encoder format
+NOT_FOUND_Message = "HTTP/1.1 404 Not Found"     # check for error message
 #--------------------------------------------------------------------------------------------------
 
 def interface():
@@ -43,8 +43,8 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
     except Exception as error_message:
         response_headers = False
 
-    # Handle HTTP Body if response headers exist (Should maybe instead check for 404)
-    if response_headers and ErrorMessage not in server_message:
+    # Handle HTTP Body if response headers exist and check for 404
+    if response_headers and NOT_FOUND_Message not in server_message:
         
         # send ACK message
         ack_message = "1"
