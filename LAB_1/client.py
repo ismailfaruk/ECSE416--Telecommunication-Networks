@@ -40,7 +40,7 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
     # Example : {'Content-Type': 'text/plain', 'Content-Length': '1024'}
     try:
         response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]]) 
-    except Exception:
+    except Exception as error_message:
         response_headers = False
 
     # Handle HTTP Body if response headers exist (Should maybe instead check for 404)
