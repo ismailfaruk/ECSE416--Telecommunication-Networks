@@ -38,10 +38,7 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
 
     # Create dictionary that holds header information
     # Example : {'Content-Type': 'text/plain', 'Content-Length': '1024'}
-    try:
-        response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]]) 
-    except Exception as error_message:
-        response_headers = False
+    response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]])     
 
     # Handle HTTP Body if response headers exist and check for 404
     if response_headers and NOT_FOUND_Message not in server_message:
@@ -70,11 +67,6 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
             
             # removes tempImage file
             os.remove(tempImage)
-    
-    else:
-        # send ACK message to not recieve anything and close socket
-        ack_message = "0"
-        sockethelp.write_http_header(client_socket, ack_message)
 
     client_socket.close()
     print("\nSocket Closed.")
