@@ -52,8 +52,18 @@ if __name__ == "__main__":
                     
                     # Send header followed by body
                     sockethelp.write_http_header(client_socket, server_message)
-                    sockethelp.write_http_body(client_socket, file_content)
 
+                    # Recieves an ACK message
+                    ack = sockethelp.read_http_header(client_socket)
+
+                    # check for ack and send content
+                    if ack == "1":
+
+                        # Send content after recieving ACK message
+                        sockethelp.write_http_body(client_socket, file_content)
+
+                    else:
+                        client_socket.close()
 
                 else:
                     server_message = "HTTP/1.1 404 Not Found"

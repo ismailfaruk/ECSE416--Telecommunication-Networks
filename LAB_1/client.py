@@ -6,8 +6,9 @@ import time
 from PIL import Image
 
 #----------------------------------------Client Constant Definitions----------------------------------------
-DEFAULT_TIMEOUT = 5             # Default timeout for client to wait for a response
-ENCODE_FORMAT = "utf-8"         # Message encoder format
+DEFAULT_TIMEOUT = 5                         # Default timeout for client to wait for a response
+ENCODE_FORMAT = "utf-8"                     # Message encoder format
+ErrorMessage = "HTTP/1.1 404 Not Found"     # check for error message
 #--------------------------------------------------------------------------------------------------
 
 def interface():
@@ -37,19 +38,28 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
 
     # Create dictionary that holds header information
     # Example : {'Content-Type': 'text/plain', 'Content-Length': '1024'}
-    response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]]) 
-    
+    try:
+        response_headers = dict([header.split(': ') for header in server_message.splitlines()[1:]]) 
+    except Exception:
+        response_headers = False
+
     # Handle HTTP Body if response headers exist (Should maybe instead check for 404)
-    if response_headers:
+    if response_headers and ErrorMessage not in server_message:
+        
+        # send ACK message
+        ack_message = "0"
+        sockethelp.write_http_header(client_socket, ack_message)
 
         # the response is decoded to get the file content
         file_content = sockethelp.read_http_body(client_socket, int(response_headers['Content-Length']))
         
         # Handle what to do with file_content based on content type.
         content_type = response_headers['Content-Type']
+        
         if content_type == "text/plain":
             file_content = file_content.decode(ENCODE_FORMAT)
             print(file_content)
+        
         elif content_type == "image/jpeg":
             epoch = time.time()
             tempImage = f"tempImage{epoch}.jpg"          # epic time is added to temp file to avoid duplicate names
@@ -60,11 +70,14 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
             
             # removes tempImage file
             os.remove(tempImage)
-            
+    
+    else:
+        # send ACK message to not recieve anything and close socket
+        ack_message = "1"
+        sockethelp.write_http_header(client_socket, ack_message)
+
     client_socket.close()
     print("\nSocket Closed.")
-
-
 
 if __name__ == "__main__":
     client_params = interface()
