@@ -8,7 +8,7 @@ Project repository for ECSE416 - Lab experiments addressing routing protocols, T
 
 ## Built With
 
-* [Python](https://www.python.org/) 3.5.8- The programming language used
+* [Python](https://www.python.org/) 3.8.5- The programming language used
 
 ## Authors
 
