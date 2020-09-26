@@ -73,8 +73,16 @@ def client(host, port, filename, timeout = DEFAULT_TIMEOUT):
 
 if __name__ == "__main__":
     client_params = interface()
+
+    import time
+    START_TIME = time.time()
+    print("Unix Starting Timestamp: %s" % round(START_TIME,5))
     
     try:
         client(client_params.host, client_params.port, client_params.filename, client_params.timeout)
     except Exception as error_message:
         print("- ERROR: ", error_message)
+
+    CURRENT_TIME = time.time()
+    print("Unix End Timestamp: %s" % round(CURRENT_TIME,5))
+    print("Unix Time elapsed: %s" % round((CURRENT_TIME - START_TIME),5))
